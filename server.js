@@ -11,6 +11,12 @@ if (!process.env.VERCEL) {
     console.log(`🌐 Local URL: http://localhost:${PORT}`);
     console.log(`📡 Health Check: http://localhost:${PORT}/api/health`);
     console.log(`=========================================`);
+
+    // Initialize yt-dlp binary in background
+    const ytdlpManager = require('./src/utils/ytdlpManager');
+    ytdlpManager.setupYtDlp().catch(err => {
+      console.warn('Initial yt-dlp setup notice:', err.message);
+    });
   });
 
   // Handle unhandled promise rejections

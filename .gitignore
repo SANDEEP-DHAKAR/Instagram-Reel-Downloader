@@ -20,3 +20,10 @@ Thumbs.db
 # Downloads folder (if files saved locally)
 downloads/
 
+# Binaries and yt-dlp
+bin/
+*.exe
+yt-dlp
+cookies.txt
+ig_cookie.txt
+

@@ -1,5 +1,6 @@
 const axios = require('axios');
 const config = require('../config');
+const ytdlpManager = require('../utils/ytdlpManager');
 
 class InstagramService {
   /**
@@ -8,20 +9,31 @@ class InstagramService {
    * @returns {string|null}
    */
   extractShortcode(url) {
-    const match = url.match(/\/(reel|reels|p|tv)\/([a-zA-Z0-9_-]+)/i);
+    const match = url.match(/\/(reel|reels|p|tv|share)\/([a-zA-Z0-9_-]+)/i);
     return match ? match[2] : null;
   }
 
   /**
    * Main method to fetch Reel data
-   * Prioritizes configured providers (EasyDown, RapidAPI) with automatic fallback
+   * Prioritizes yt-dlp engine with automatic fallback to EasyDown & RapidAPI
    * @param {string} reelUrl 
    */
   async getReelData(reelUrl) {
     const shortcode = this.extractShortcode(reelUrl);
     let lastError = null;
 
-    // 1. Try EasyDown API if configured
+    // 1. Try yt-dlp first (Local & Serverless standalone binary extractor)
+    try {
+      const ytResult = await ytdlpManager.extractMediaInfo(reelUrl);
+      if (ytResult && (ytResult.videoUrl || ytResult.thumbnail)) {
+        return ytResult;
+      }
+    } catch (err) {
+      console.warn('yt-dlp attempt failed:', err.message);
+      lastError = err;
+    }
+
+    // 2. Try EasyDown API if configured
     if (config.easyDownKey) {
       try {
         const result = await this.fetchFromEasyDown(reelUrl);
@@ -34,7 +46,7 @@ class InstagramService {
       }
     }
 
-    // 2. Try RapidAPI if configured
+    // 3. Try RapidAPI if configured
     if (config.rapidApi.key && config.rapidApi.host) {
       try {
         const result = await this.fetchFromRapidApi(reelUrl);
@@ -47,16 +59,26 @@ class InstagramService {
       }
     }
 
-    // If an error occurred during provider calls, throw the error
+    // If an error occurred across all providers, format a clear, user-friendly error
     if (lastError) {
-      throw new Error(`Failed to fetch reel: ${lastError.message}`);
+      const msg = lastError.message || '';
+      if (msg.includes('Insufficient credits')) {
+        throw new Error('EasyDown API credits are exhausted. Please add credits or update RapidAPI credentials.');
+      }
+      if (msg.includes('undergoing an upgrade')) {
+        throw new Error('RapidAPI provider is temporarily undergoing maintenance. Please try again later.');
+      }
+      if (msg.includes('empty media response') || msg.includes('not granting access') || msg.includes('login')) {
+        throw new Error('Instagram requires authentication. Add a cookies.txt file to root or configure an active RapidAPI key in .env.');
+      }
+      throw new Error(`Failed to fetch reel: ${msg}`);
     }
 
     // Default response when no API provider credentials are set
     return {
       id: shortcode,
       originalUrl: reelUrl,
-      message: 'Service is ready. Configure EASYDOWN_API_KEY or RAPIDAPI_KEY in .env to fetch live reel streams.',
+      message: 'Service is ready. Configure EASYDOWN_API_KEY, RAPIDAPI_KEY, or cookies.txt to fetch live reel streams.',
       videoUrl: null,
       thumbnail: null,
       caption: null
@@ -125,58 +147,82 @@ class InstagramService {
    * @param {string} reelUrl 
    */
   async fetchFromRapidApi(reelUrl) {
-    const endpoint = `https://${config.rapidApi.host}/download`;
+    const endpointsToTry = [
+      `https://${config.rapidApi.host}/download`,
+      `https://${config.rapidApi.host}/`
+    ];
 
-    try {
-      const response = await axios.get(endpoint, {
-        params: { url: reelUrl },
-        headers: {
-          'x-rapidapi-key': config.rapidApi.key,
-          'x-rapidapi-host': config.rapidApi.host
-        },
-        timeout: 15000
-      });
+    let response = null;
+    let lastErr = null;
 
-      const data = response.data;
+    for (const ep of endpointsToTry) {
+      try {
+        response = await axios.get(ep, {
+          params: { url: reelUrl },
+          headers: {
+            'x-rapidapi-key': config.rapidApi.key,
+            'x-rapidapi-host': config.rapidApi.host
+          },
+          timeout: 15000
+        });
+        if (response && response.data) break;
+      } catch (err) {
+        lastErr = err;
+        if (err.response?.status !== 404) {
+          break;
+        }
+      }
+    }
 
-      const videoUrl = 
-        data?.medias?.[0]?.url ||
-        data?.video_url ||
-        data?.download_url ||
-        data?.data?.video ||
-        data?.result?.[0]?.url ||
-        (typeof data?.url === 'string' && data.url.includes('.mp4') ? data.url : null) ||
-        null;
-
-      const thumbnail =
-        data?.thumbnail ||
-        data?.cover ||
-        data?.medias?.[0]?.thumbnail ||
-        data?.data?.thumbnail ||
-        null;
-
-      const caption = data?.title || data?.caption || data?.author || '';
-      const audioUrl = data?.audio_url || data?.music_url || data?.medias?.find(m => m.type === 'audio')?.url || null;
-
-      const allVideos = data?.medias?.filter(m => m.type === 'video' || (m.extension && m.extension.includes('mp4'))) || (videoUrl ? [{ url: videoUrl, quality: '1080p' }] : []);
-      const allAudios = data?.medias?.filter(m => m.type === 'audio' || (m.extension && m.extension.includes('mp3'))) || (audioUrl ? [{ url: audioUrl, quality: 'MP3 Audio' }] : []);
-
-      return {
-        id: this.extractShortcode(reelUrl),
-        originalUrl: reelUrl,
-        videoUrl,
-        audioUrl,
-        thumbnail,
-        caption,
-        allVideos,
-        allAudios,
-        provider: 'RapidAPI',
-        raw: data
-      };
-    } catch (err) {
-      const errMsg = err.response?.data?.message || err.message || 'RapidAPI request failed';
+    if (!response || !response.data) {
+      const errMsg = lastErr?.response?.data?.message || lastErr?.message || 'RapidAPI request failed';
       throw new Error(`RapidAPI Error: ${errMsg}`);
     }
+
+    const data = response.data;
+
+    const videoUrl = 
+      data?.medias?.[0]?.url ||
+      data?.video_url ||
+      data?.download_url ||
+      data?.data?.video ||
+      data?.data?.[0]?.url ||
+      data?.data?.url ||
+      data?.result?.[0]?.url ||
+      data?.result?.video ||
+      data?.video ||
+      (typeof data?.url === 'string' && (data.url.includes('.mp4') || data.url.includes('cdn')) ? data.url : null) ||
+      (Array.isArray(data) && data[0]?.url ? data[0].url : null) ||
+      null;
+
+    const thumbnail =
+      data?.thumbnail ||
+      data?.cover ||
+      data?.medias?.[0]?.thumbnail ||
+      data?.data?.thumbnail ||
+      data?.data?.[0]?.thumbnail ||
+      data?.result?.[0]?.thumbnail ||
+      data?.image ||
+      null;
+
+    const caption = data?.title || data?.caption || data?.author || '';
+    const audioUrl = data?.audio_url || data?.music_url || data?.medias?.find(m => m.type === 'audio')?.url || null;
+
+    const allVideos = data?.medias?.filter(m => m.type === 'video' || (m.extension && m.extension.includes('mp4'))) || (videoUrl ? [{ url: videoUrl, quality: '1080p' }] : []);
+    const allAudios = data?.medias?.filter(m => m.type === 'audio' || (m.extension && m.extension.includes('mp3'))) || (audioUrl ? [{ url: audioUrl, quality: 'MP3 Audio' }] : []);
+
+    return {
+      id: this.extractShortcode(reelUrl),
+      originalUrl: reelUrl,
+      videoUrl,
+      audioUrl,
+      thumbnail,
+      caption,
+      allVideos,
+      allAudios,
+      provider: 'RapidAPI',
+      raw: data
+    };
   }
 }
 

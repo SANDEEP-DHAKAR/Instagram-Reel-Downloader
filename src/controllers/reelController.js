@@ -43,8 +43,9 @@ const streamFile = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Query param "url" is required' });
     }
 
-    const safeFilename = filename ? filename.replace(/[^a-zA-Z0-9_.-]/g, '_') : 'instagram-reel.mp4';
-    const contentType = type === 'image' ? 'image/jpeg' : 'video/mp4';
+    let contentType = 'video/mp4';
+    if (type === 'image') contentType = 'image/jpeg';
+    else if (type === 'audio') contentType = 'audio/mpeg';
     const isInline = req.query.inline === 'true';
 
     if (isInline) {

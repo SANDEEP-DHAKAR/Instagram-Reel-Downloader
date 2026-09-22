@@ -1,5 +1,6 @@
 // ==========================================================
-// InstaReels Downloader - Feature-Rich Client Script
+// InstaReels Downloader - Created by Sandeep
+// Feature-Rich Interactive Script with Multi-Quality Selector
 // ==========================================================
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -14,10 +15,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const statusMessage = document.getElementById('statusMessage');
   const resultCard = document.getElementById('resultCard');
-  const mediaContainer = document.getElementById('mediaContainer');
-  const mediaTabs = document.getElementById('mediaTabs');
-  const tabVideo = document.getElementById('tabVideo');
-  const tabThumb = document.getElementById('tabThumb');
+
+  // Media Showcase Elements
+  const thumbCard = document.getElementById('thumbCard');
+  const reelCoverImg = document.getElementById('reelCoverImg');
+  const videoCard = document.getElementById('videoCard');
+  const reelVideoPlayer = document.getElementById('reelVideoPlayer');
 
   const reelTitle = document.getElementById('reelTitle');
   const reelCaption = document.getElementById('reelCaption');
@@ -25,8 +28,17 @@ document.addEventListener('DOMContentLoaded', () => {
   const shortcodeBadge = document.getElementById('shortcodeBadge');
   const qualityBadge = document.getElementById('qualityBadge');
 
-  const downloadVideoBtn = document.getElementById('downloadVideoBtn');
-  const downloadThumbBtn = document.getElementById('downloadThumbBtn');
+  // Format & Quality Selector Elements
+  const chipVideo = document.getElementById('chipVideo');
+  const chipAudio = document.getElementById('chipAudio');
+  const chipCover = document.getElementById('chipCover');
+  const videoQualityGroup = document.getElementById('videoQualityGroup');
+  const audioQualityGroup = document.getElementById('audioQualityGroup');
+  const videoQualityCards = document.querySelectorAll('#videoQualityGroup .quality-card');
+  const audioQualityCards = document.querySelectorAll('#audioQualityGroup .quality-card');
+
+  const mainDownloadBtn = document.getElementById('mainDownloadBtn');
+  const mainDownloadText = document.getElementById('mainDownloadText');
   const copyLinkBtn = document.getElementById('copyLinkBtn');
   const copyCaptionBtn = document.getElementById('copyCaptionBtn');
   const resetBtn = document.getElementById('resetBtn');
@@ -40,6 +52,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const toastContainer = document.getElementById('toastContainer');
 
   let currentReelData = null;
+  let selectedFormat = 'video'; // 'video' | 'audio' | 'image'
+  let selectedVideoQuality = '1080p';
+  let selectedAudioQuality = '320';
 
   // --------------------------------------------------------
   // 1. Toast Notification Utility
@@ -146,7 +161,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     hideStatus();
     resultCard.classList.add('hidden');
-    mediaContainer.innerHTML = '';
     setLoading(true);
 
     try {
@@ -165,7 +179,7 @@ document.addEventListener('DOMContentLoaded', () => {
       currentReelData = result.data;
       renderResult(currentReelData);
       saveToHistory(currentReelData);
-      showToast('Reel fetched successfully!', 'success');
+      showToast('Reel fetched successfully by Sandeep!', 'success');
 
     } catch (err) {
       showStatus(err.message, 'error');
@@ -176,59 +190,98 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // --------------------------------------------------------
-  // 6. Media Tabs (Video vs Thumbnail)
+  // 6. Interactive Format & Quality Selector Logic
   // --------------------------------------------------------
-  tabVideo.addEventListener('click', () => {
-    showVideoPreview();
+  chipVideo.addEventListener('click', () => {
+    setActiveFormat('video');
   });
 
-  tabThumb.addEventListener('click', () => {
-    showThumbPreview();
+  chipAudio.addEventListener('click', () => {
+    setActiveFormat('audio');
   });
 
-  function showVideoPreview() {
-    tabThumb.classList.remove('active');
-    tabVideo.classList.add('active');
+  chipCover.addEventListener('click', () => {
+    setActiveFormat('image');
+  });
 
-    if (currentReelData?.videoUrl) {
-      const posterUrl = currentReelData.thumbnail || '';
-      mediaContainer.innerHTML = `
-        <video controls autoplay muted playsinline poster="${posterUrl}">
-          <source src="${currentReelData.videoUrl}" type="video/mp4">
-          Your browser does not support HTML5 video.
-        </video>
-      `;
-    } else {
-      showThumbPreview();
+  function setActiveFormat(format) {
+    selectedFormat = format;
+    [chipVideo, chipAudio, chipCover].forEach(c => c.classList.remove('active'));
+
+    if (format === 'video') {
+      chipVideo.classList.add('active');
+      videoQualityGroup.classList.remove('hidden');
+      audioQualityGroup.classList.add('hidden');
+    } else if (format === 'audio') {
+      chipAudio.classList.add('active');
+      videoQualityGroup.classList.add('hidden');
+      audioQualityGroup.classList.remove('hidden');
+    } else if (format === 'image') {
+      chipCover.classList.add('active');
+      videoQualityGroup.classList.add('hidden');
+      audioQualityGroup.classList.add('hidden');
+    }
+
+    updateDownloadButton();
+  }
+
+  videoQualityCards.forEach(card => {
+    card.addEventListener('click', () => {
+      videoQualityCards.forEach(c => c.classList.remove('active'));
+      card.classList.add('active');
+      selectedVideoQuality = card.dataset.quality || '1080p';
+      updateDownloadButton();
+    });
+  });
+
+  audioQualityCards.forEach(card => {
+    card.addEventListener('click', () => {
+      audioQualityCards.forEach(c => c.classList.remove('active'));
+      card.classList.add('active');
+      selectedAudioQuality = card.dataset.audioQuality || '320';
+      updateDownloadButton();
+    });
+  });
+
+  function updateDownloadButton() {
+    if (!currentReelData) return;
+    const shortcode = currentReelData.id || 'reel';
+
+    if (selectedFormat === 'video') {
+      const vidUrl = currentReelData.videoUrl;
+      if (!vidUrl) {
+        mainDownloadText.textContent = '❌ Video Stream Not Available';
+        mainDownloadBtn.removeAttribute('href');
+        return;
+      }
+      mainDownloadText.textContent = `⬇️ Download ${selectedVideoQuality.toUpperCase()} Video (MP4)`;
+      mainDownloadBtn.href = `/api/reels/stream?url=${encodeURIComponent(vidUrl)}&filename=instagram_reel_${shortcode}_${selectedVideoQuality}.mp4`;
+      qualityBadge.textContent = selectedVideoQuality.toUpperCase();
+    } else if (selectedFormat === 'audio') {
+      const audUrl = currentReelData.audioUrl || currentReelData.videoUrl;
+      if (!audUrl) {
+        mainDownloadText.textContent = '❌ Audio Track Not Available';
+        mainDownloadBtn.removeAttribute('href');
+        return;
+      }
+      mainDownloadText.textContent = `🎵 Download ${selectedAudioQuality} kbps Audio (MP3)`;
+      mainDownloadBtn.href = `/api/reels/stream?url=${encodeURIComponent(audUrl)}&filename=instagram_audio_${shortcode}_${selectedAudioQuality}kbps.mp3&type=audio`;
+      qualityBadge.textContent = `MP3 ${selectedAudioQuality}k`;
+    } else if (selectedFormat === 'image') {
+      const thumbUrl = currentReelData.thumbnail;
+      if (!thumbUrl) {
+        mainDownloadText.textContent = '❌ Cover Image Not Available';
+        mainDownloadBtn.removeAttribute('href');
+        return;
+      }
+      mainDownloadText.textContent = `🖼️ Download HD Cover Image (JPG)`;
+      mainDownloadBtn.href = `/api/reels/stream?url=${encodeURIComponent(thumbUrl)}&filename=cover_${shortcode}.jpg&type=image`;
+      qualityBadge.textContent = 'HD Cover';
     }
   }
 
-  function showThumbPreview() {
-    tabVideo.classList.remove('active');
-    tabThumb.classList.add('active');
-
-    const thumbUrl = currentReelData?.thumbnail;
-    if (thumbUrl) {
-      const fallbackProxy = `/api/reels/stream?url=${encodeURIComponent(thumbUrl)}&type=image&inline=true`;
-      mediaContainer.innerHTML = `
-        <img 
-          src="${thumbUrl}" 
-          referrerpolicy="no-referrer"
-          alt="Instagram Reel Cover" 
-          onerror="if(!this.dataset.tried) { this.dataset.tried=1; this.src='${fallbackProxy}'; }"
-        />
-      `;
-    } else {
-      mediaContainer.innerHTML = `
-        <div class="history-thumb-placeholder">
-          <span>🖼️ No Thumbnail</span>
-        </div>
-      `;
-    }
-  }
-
   // --------------------------------------------------------
-  // 7. Render Result Card
+  // 7. Render Result Card (Guaranteed Thumbnail & Video)
   // --------------------------------------------------------
   function renderResult(data) {
     const shortcode = data.id || 'Reel';
@@ -246,43 +299,39 @@ document.addEventListener('DOMContentLoaded', () => {
       toggleCaptionBtn.classList.add('hidden');
     }
 
-    // Tab visibility
-    if (data.videoUrl && data.thumbnail) {
-      mediaTabs.classList.remove('hidden');
-      tabVideo.classList.remove('hidden');
-      tabThumb.classList.remove('hidden');
-      showVideoPreview();
-    } else if (data.thumbnail) {
-      mediaTabs.classList.remove('hidden');
-      tabVideo.classList.add('hidden');
-      showThumbPreview();
-    } else if (data.videoUrl) {
-      mediaTabs.classList.add('hidden');
-      showVideoPreview();
+    // 1. Guaranteed Thumbnail Display
+    const thumbUrl = data.thumbnail;
+    if (thumbUrl) {
+      thumbCard.classList.remove('hidden');
+      const fallbackProxy = `/api/reels/stream?url=${encodeURIComponent(thumbUrl)}&type=image&inline=true`;
+      reelCoverImg.src = thumbUrl;
+      reelCoverImg.dataset.tried = '';
+      reelCoverImg.onerror = function() {
+        if (!this.dataset.tried) {
+          this.dataset.tried = '1';
+          this.src = fallbackProxy;
+        }
+      };
     } else {
-      mediaTabs.classList.add('hidden');
-      mediaContainer.innerHTML = `
-        <div class="history-thumb-placeholder">
-          <span>🎬</span>
-        </div>
-      `;
+      thumbCard.classList.add('hidden');
     }
 
-    // Action buttons configuration
+    // 2. Video Player Display
     if (data.videoUrl) {
-      downloadVideoBtn.href = `/api/reels/stream?url=${encodeURIComponent(data.videoUrl)}&filename=instagram_reel_${shortcode}.mp4`;
-      downloadVideoBtn.classList.remove('hidden');
-      qualityBadge.textContent = 'HD 1080p';
+      videoCard.classList.remove('hidden');
+      reelVideoPlayer.src = data.videoUrl;
+      if (thumbUrl) {
+        reelVideoPlayer.poster = thumbUrl;
+      }
     } else {
-      downloadVideoBtn.classList.add('hidden');
-      qualityBadge.textContent = data.thumbnail ? 'Cover Only' : 'Verified Link';
+      videoCard.classList.add('hidden');
     }
 
-    if (data.thumbnail) {
-      downloadThumbBtn.href = `/api/reels/stream?url=${encodeURIComponent(data.thumbnail)}&filename=cover_${shortcode}.jpg&type=image`;
-      downloadThumbBtn.classList.remove('hidden');
-    } else {
-      downloadThumbBtn.classList.add('hidden');
+    // Default format to video if available, else image
+    if (data.videoUrl) {
+      setActiveFormat('video');
+    } else if (thumbUrl) {
+      setActiveFormat('image');
     }
 
     resultCard.classList.remove('hidden');
@@ -301,9 +350,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const link = currentReelData?.videoUrl || currentReelData?.originalUrl;
     if (link) {
       await navigator.clipboard.writeText(link);
-      showToast('Video link copied to clipboard!', 'success');
+      showToast('Link copied to clipboard!', 'success');
     } else {
-      showToast('No video link available to copy', 'error');
+      showToast('No link available to copy', 'error');
     }
   });
 
@@ -321,7 +370,9 @@ document.addEventListener('DOMContentLoaded', () => {
     urlInput.value = '';
     clearBtn.classList.add('hidden');
     resultCard.classList.add('hidden');
-    mediaContainer.innerHTML = '';
+    reelVideoPlayer.pause();
+    reelVideoPlayer.src = '';
+    reelCoverImg.src = '';
     hideStatus();
     urlInput.focus();
     window.scrollTo({ top: 0, behavior: 'smooth' });

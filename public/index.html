@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>InstaReels Downloader - Download Instagram Reels in HD</title>
+  <title>InstaReels Downloader - Created by Sandeep</title>
   <meta name="referrer" content="no-referrer" />
-  <meta name="description" content="Fast, free, and high-quality Instagram Reel and Video downloader. Save MP4 videos without watermarks." />
+  <meta name="description" content="Fast, free, and high-quality Instagram Reel and Video downloader with quality selection. Created by Sandeep." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -18,10 +18,18 @@
   <!-- Navbar -->
   <nav class="navbar">
     <div class="nav-container">
-      <div class="brand">
-        <div class="brand-icon">⚡</div>
-        <span class="brand-text">Insta<span class="gradient-text">Reels</span></span>
+      <div class="brand-group">
+        <a href="#" class="brand">
+          <div class="brand-icon">⚡</div>
+          <span class="brand-text">Insta<span class="gradient-text">Reels</span></span>
+        </a>
+        <div class="creator-badge-nav" title="Developed by Sandeep">
+          <span class="pulse-dot"></span>
+          <span>By <strong>Sandeep</strong></span>
+          <span class="verified-tick" title="Verified Creator">✓</span>
+        </div>
       </div>
+
       <div class="nav-links">
         <a href="#howItWorks">How It Works</a>
         <a href="#features">Features</a>
@@ -36,23 +44,29 @@
   <div class="main-wrapper">
     <!-- Hero Section -->
     <header class="hero">
-      <div class="badge-pill">
-        <span class="badge-dot"></span>
-        <span>Fast, Free & Unlimited</span>
+      <!-- Creator Spotlight Badge -->
+      <div class="creator-hero-banner">
+        <div class="creator-avatar">👨‍💻</div>
+        <div class="creator-meta">
+          <span class="creator-label">Official Project By</span>
+          <span class="creator-name">Sandeep <span class="verified-badge-gold">✓ Verified Developer</span></span>
+        </div>
+        <div class="creator-tag">Ultra HD Downloader</div>
       </div>
+
       <h1 class="hero-title">
         Download <span class="gradient-text">Instagram Reels</span> in High Quality
       </h1>
       <p class="hero-subtitle">
-        Save public Instagram Reels, Videos, and Posts directly to your device in original HD MP4 format. No login required.
+        Save public Instagram Reels, Videos, and Audio directly to your device with multiple quality options. Free, fast & no watermark.
       </p>
 
       <!-- Feature Badges -->
       <div class="feature-pills">
-        <div class="pill">🌟 1080p Ultra HD</div>
+        <div class="pill">🌟 1080p / 720p HD Video</div>
+        <div class="pill">🎵 MP3 Audio Extract</div>
         <div class="pill">🚫 No Watermark</div>
-        <div class="pill">⚡ Instant Processing</div>
-        <div class="pill">🔒 100% Safe & Secure</div>
+        <div class="pill">⚡ Lightning Fast</div>
       </div>
     </header>
 
@@ -90,16 +104,30 @@
         <div class="result-grid">
           <!-- Media Preview Column -->
           <div class="media-col">
-            <div class="media-tabs" id="mediaTabs">
-              <button type="button" id="tabVideo" class="media-tab active">🎬 Video Preview</button>
-              <button type="button" id="tabThumb" class="media-tab">🖼️ Cover Thumbnail</button>
+            <!-- Dedicated Cover Thumbnail Showcase (Always visible!) -->
+            <div class="media-box-card" id="thumbCard">
+              <div class="media-box-header">
+                <span class="media-box-title">🖼️ Reel Cover Thumbnail</span>
+                <span class="badge-tag">HD Photo</span>
+              </div>
+              <div class="media-frame" id="thumbFrame">
+                <img id="reelCoverImg" src="" alt="Instagram Reel Cover" referrerpolicy="no-referrer" />
+              </div>
             </div>
-            <div class="media-frame" id="mediaContainer">
-              <!-- Video / Image injected dynamically -->
+
+            <!-- Dedicated Video Player Showcase -->
+            <div class="media-box-card" id="videoCard">
+              <div class="media-box-header">
+                <span class="media-box-title">🎬 Video Player</span>
+                <span class="badge-tag live-badge">Live HD</span>
+              </div>
+              <div class="media-frame" id="videoFrame">
+                <video id="reelVideoPlayer" controls playsinline></video>
+              </div>
             </div>
           </div>
 
-          <!-- Metadata & Download Actions Column -->
+          <!-- Metadata & Quality Options Column -->
           <div class="details-col">
             <div class="result-header">
               <span class="badge-quality" id="qualityBadge">HD 1080p</span>
@@ -113,30 +141,78 @@
               <button id="toggleCaptionBtn" class="btn-text-link hidden">Show more</button>
             </div>
 
-            <div class="action-buttons">
-              <!-- Direct Download (Forced attachment) -->
-              <a id="downloadVideoBtn" href="#" class="btn-action btn-primary">
-                <span>🎬 Download Video (MP4)</span>
-              </a>
+            <!-- Quality & Format Selector Box -->
+            <div class="quality-selector-box" id="qualitySelectorBox">
+              <div class="selector-header">
+                <span class="selector-title">🎯 Select Format & Quality:</span>
+              </div>
 
-              <!-- Download Thumbnail -->
-              <a id="downloadThumbBtn" href="#" class="btn-action btn-secondary">
-                <span>🖼️ Download Cover</span>
-              </a>
+              <!-- Format Switcher -->
+              <div class="format-chips">
+                <button type="button" class="format-chip active" id="chipVideo" data-format="video">
+                  🎬 Video (MP4)
+                </button>
+                <button type="button" class="format-chip" id="chipAudio" data-format="audio">
+                  🎵 Audio (MP3)
+                </button>
+                <button type="button" class="format-chip" id="chipCover" data-format="image">
+                  🖼️ Cover (HD)
+                </button>
+              </div>
 
-              <!-- Copy Direct Link -->
-              <button id="copyLinkBtn" class="btn-action btn-secondary">
+              <!-- Video Quality Options -->
+              <div class="quality-grid" id="videoQualityGroup">
+                <button type="button" class="quality-card active" data-quality="1080p">
+                  <div class="quality-label">1080p Full HD</div>
+                  <div class="quality-desc">Original High Res</div>
+                  <span class="quality-tag best">Best</span>
+                </button>
+                <button type="button" class="quality-card" data-quality="720p">
+                  <div class="quality-label">720p HD</div>
+                  <div class="quality-desc">Balanced Speed</div>
+                  <span class="quality-tag fast">Fast</span>
+                </button>
+                <button type="button" class="quality-card" data-quality="480p">
+                  <div class="quality-label">480p SD</div>
+                  <div class="quality-desc">Data Saver</div>
+                  <span class="quality-tag saver">Lite</span>
+                </button>
+              </div>
+
+              <!-- Audio Quality Options -->
+              <div class="quality-grid hidden" id="audioQualityGroup">
+                <button type="button" class="quality-card active" data-audio-quality="320">
+                  <div class="quality-label">320 kbps MP3</div>
+                  <div class="quality-desc">Studio Audio</div>
+                  <span class="quality-tag best">HQ Audio</span>
+                </button>
+                <button type="button" class="quality-card" data-audio-quality="128">
+                  <div class="quality-label">128 kbps MP3</div>
+                  <div class="quality-desc">Standard Audio</div>
+                  <span class="quality-tag saver">Standard</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Dynamic Download Button -->
+            <div class="main-download-area">
+              <a id="mainDownloadBtn" href="#" class="btn-action btn-primary btn-download-hero">
+                <span id="mainDownloadText">⬇️ Download 1080p Full HD Video</span>
+              </a>
+            </div>
+
+            <!-- Secondary Actions -->
+            <div class="action-buttons-secondary">
+              <button type="button" id="copyLinkBtn" class="btn-action btn-secondary">
                 <span>📋 Copy Link</span>
               </button>
-
-              <!-- Copy Caption -->
-              <button id="copyCaptionBtn" class="btn-action btn-secondary">
+              <button type="button" id="copyCaptionBtn" class="btn-action btn-secondary">
                 <span>📝 Copy Caption</span>
               </button>
             </div>
 
             <!-- Download Another Button -->
-            <button id="resetBtn" class="btn-reset">
+            <button type="button" id="resetBtn" class="btn-reset">
               🔄 Download Another Reel
             </button>
           </div>
@@ -178,8 +254,8 @@
         <div class="step-card">
           <div class="step-num">3</div>
           <div class="step-icon">⬇️</div>
-          <h3>Download & Enjoy</h3>
-          <p>Click <strong>Fetch Reel</strong> and hit the download button to save the MP4 video directly to your storage.</p>
+          <h3>Select Quality & Download</h3>
+          <p>Choose <strong>1080p, 720p, or MP3 Audio</strong> and hit download to save directly to your storage.</p>
         </div>
       </div>
     </section>
@@ -187,19 +263,19 @@
     <!-- Features Section -->
     <section id="features" class="info-section">
       <h2 class="section-title">Why Choose InstaReels?</h2>
-      <p class="section-subtitle">Everything you need for seamless Instagram reel downloads</p>
+      <p class="section-subtitle">Engineered by Sandeep with modern web performance in mind</p>
 
       <div class="features-grid">
         <div class="feature-card">
           <div class="feature-icon">✨</div>
-          <h3>Original High Quality</h3>
-          <p>Get videos in their native full HD quality with crisp audio without compression.</p>
+          <h3>Multi-Quality Selector</h3>
+          <p>Pick between 1080p Full HD, 720p, 480p, or extract pure MP3 audio from any reel.</p>
         </div>
 
         <div class="feature-card">
           <div class="feature-icon">⚡</div>
           <h3>Lightning Fast Speeds</h3>
-          <p>High performance streaming backend ensures your download starts immediately without wait times.</p>
+          <p>Direct proxy streaming ensures instant downloads without waiting for slow servers.</p>
         </div>
 
         <div class="feature-card">
@@ -224,11 +300,21 @@
       <div class="faq-accordion">
         <details class="faq-item">
           <summary class="faq-question">
+            <span>Can I download audio (MP3) separately?</span>
+            <span class="faq-arrow">▾</span>
+          </summary>
+          <div class="faq-answer">
+            <p>Yes! With our new Quality Selector, simply click on <strong>🎵 Audio (MP3)</strong> and select your desired audio bitrate (320kbps or 128kbps) to download just the audio track.</p>
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-question">
             <span>Is this Instagram Reel Downloader free to use?</span>
             <span class="faq-arrow">▾</span>
           </summary>
           <div class="faq-answer">
-            <p>Yes, our downloader is 100% free with unlimited downloads. You don't need any subscription or payment.</p>
+            <p>Yes, this tool built by Sandeep is 100% free with unlimited downloads. You don't need any subscription or payment.</p>
           </div>
         </details>
 
@@ -244,21 +330,11 @@
 
         <details class="faq-item">
           <summary class="faq-question">
-            <span>Where are the downloaded videos saved?</span>
-            <span class="faq-arrow">▾</span>
-          </summary>
-          <div class="faq-answer">
-            <p>Downloaded videos are typically saved in your device's default <strong>Downloads</strong> folder or your browser's designated download path.</p>
-          </div>
-        </details>
-
-        <details class="faq-item">
-          <summary class="faq-question">
             <span>Do downloaded reels have any watermarks?</span>
             <span class="faq-arrow">▾</span>
           </summary>
           <div class="faq-answer">
-            <p>No! All reels and videos downloaded through our service are completely free of added watermarks.</p>
+            <p>No! All reels and videos downloaded through our service are completely free of added watermarks in native quality.</p>
           </div>
         </details>
       </div>
@@ -270,6 +346,9 @@
         <div class="footer-brand">
           <span class="brand-icon">⚡</span>
           <span class="brand-text">Insta<span class="gradient-text">Reels</span></span>
+        </div>
+        <div class="footer-creator-highlight">
+          <span>🚀 Handcrafted & Maintained with precision by <strong>Sandeep</strong></span>
         </div>
         <p class="footer-text">
           Designed for personal use and backup. This tool is not affiliated with, endorsed, or sponsored by Instagram or Meta Platforms, Inc.

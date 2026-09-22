@@ -85,12 +85,17 @@ class InstagramService {
       const mediaData = resData?.data;
 
       const videoUrl = mediaData?.videos?.[0]?.url || null;
+      const audioUrl = mediaData?.audios?.[0]?.url || null;
+      const rawImage = mediaData?.images?.[0];
+      const imageFromList = typeof rawImage === 'string' ? rawImage : rawImage?.url;
+
       const thumbnail = 
         mediaData?.thumbnail ||
         mediaData?.cover ||
         mediaData?.poster ||
+        imageFromList ||
         mediaData?.image ||
-        mediaData?.images?.[0]?.url ||
+        mediaData?.thumbnail_url ||
         resData?.thumbnail ||
         resData?.cover ||
         null;
@@ -100,11 +105,13 @@ class InstagramService {
         id: this.extractShortcode(reelUrl),
         originalUrl: reelUrl,
         videoUrl,
+        audioUrl,
         thumbnail,
         caption,
         platform: mediaData?.platform || 'instagram',
         allVideos: mediaData?.videos || [],
         allImages: mediaData?.images || [],
+        allAudios: mediaData?.audios || [],
         provider: 'EasyDown'
       };
     } catch (error) {
@@ -149,13 +156,20 @@ class InstagramService {
         null;
 
       const caption = data?.title || data?.caption || data?.author || '';
+      const audioUrl = data?.audio_url || data?.music_url || data?.medias?.find(m => m.type === 'audio')?.url || null;
+
+      const allVideos = data?.medias?.filter(m => m.type === 'video' || (m.extension && m.extension.includes('mp4'))) || (videoUrl ? [{ url: videoUrl, quality: '1080p' }] : []);
+      const allAudios = data?.medias?.filter(m => m.type === 'audio' || (m.extension && m.extension.includes('mp3'))) || (audioUrl ? [{ url: audioUrl, quality: 'MP3 Audio' }] : []);
 
       return {
         id: this.extractShortcode(reelUrl),
         originalUrl: reelUrl,
         videoUrl,
+        audioUrl,
         thumbnail,
         caption,
+        allVideos,
+        allAudios,
         provider: 'RapidAPI',
         raw: data
       };

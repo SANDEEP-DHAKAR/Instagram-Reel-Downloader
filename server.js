@@ -1,0 +1,19 @@
+const app = require('./src/app');
+const config = require('./src/config');
+
+const PORT = config.port;
+
+const server = app.listen(PORT, () => {
+  console.log(`=========================================`);
+  console.log(`🚀 Server running in ${config.env} mode`);
+  console.log(`🌐 Local URL: http://localhost:${PORT}`);
+  console.log(`📡 Health Check: http://localhost:${PORT}/api/health`);
+  console.log(`=========================================`);
+});
+
+// Handle unhandled promise rejections
+process.on('unhandledRejection', (err) => {
+  console.error('Unhandled Rejection Error:', err);
+  server.close(() => process.exit(1));
+});
+

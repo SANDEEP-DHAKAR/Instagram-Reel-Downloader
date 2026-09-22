@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>InstaReels Downloader - Download Instagram Reels in HD</title>
+  <meta name="referrer" content="no-referrer" />
+  <meta name="description" content="Fast, free, and high-quality Instagram Reel and Video downloader. Save MP4 videos without watermarks." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="brand">
+        <div class="brand-icon">⚡</div>
+        <span class="brand-text">Insta<span class="gradient-text">Reels</span></span>
+      </div>
+      <div class="nav-links">
+        <a href="#howItWorks">How It Works</a>
+        <a href="#features">Features</a>
+        <a href="#faq">FAQ</a>
+        <button id="themeToggle" class="btn-icon" title="Toggle Theme" aria-label="Toggle Theme">
+          <span class="theme-icon">☀️</span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="main-wrapper">
+    <!-- Hero Section -->
+    <header class="hero">
+      <div class="badge-pill">
+        <span class="badge-dot"></span>
+        <span>Fast, Free & Unlimited</span>
+      </div>
+      <h1 class="hero-title">
+        Download <span class="gradient-text">Instagram Reels</span> in High Quality
+      </h1>
+      <p class="hero-subtitle">
+        Save public Instagram Reels, Videos, and Posts directly to your device in original HD MP4 format. No login required.
+      </p>
+
+      <!-- Feature Badges -->
+      <div class="feature-pills">
+        <div class="pill">🌟 1080p Ultra HD</div>
+        <div class="pill">🚫 No Watermark</div>
+        <div class="pill">⚡ Instant Processing</div>
+        <div class="pill">🔒 100% Safe & Secure</div>
+      </div>
+    </header>
+
+    <!-- Downloader Card -->
+    <main class="downloader-card">
+      <form id="downloadForm" class="downloader-form">
+        <div class="input-wrapper">
+          <span class="input-icon">🔗</span>
+          <input 
+            type="text" 
+            id="urlInput" 
+            placeholder="Paste Instagram Reel or Post link here..." 
+            required 
+            autocomplete="off"
+            spellcheck="false"
+          />
+          <button type="button" id="clearBtn" class="btn-action-inline hidden" title="Clear input">
+            ✕
+          </button>
+          <button type="button" id="pasteBtn" class="btn-action-inline paste-btn" title="Paste from clipboard">
+            📋 Paste
+          </button>
+        </div>
+        <button type="submit" id="submitBtn" class="btn-submit">
+          <span class="btn-text">Fetch Reel</span>
+          <span class="spinner hidden"></span>
+        </button>
+      </form>
+
+      <!-- Inline Status Alert -->
+      <div id="statusMessage" class="status-box hidden"></div>
+
+      <!-- Result Card -->
+      <section id="resultCard" class="result-section hidden">
+        <div class="result-grid">
+          <!-- Media Preview Column -->
+          <div class="media-col">
+            <div class="media-tabs" id="mediaTabs">
+              <button type="button" id="tabVideo" class="media-tab active">🎬 Video Preview</button>
+              <button type="button" id="tabThumb" class="media-tab">🖼️ Cover Thumbnail</button>
+            </div>
+            <div class="media-frame" id="mediaContainer">
+              <!-- Video / Image injected dynamically -->
+            </div>
+          </div>
+
+          <!-- Metadata & Download Actions Column -->
+          <div class="details-col">
+            <div class="result-header">
+              <span class="badge-quality" id="qualityBadge">HD 1080p</span>
+              <span class="badge-id" id="shortcodeBadge">ID: ---</span>
+            </div>
+
+            <h2 id="reelTitle" class="result-title">Reel Ready</h2>
+            
+            <div class="caption-container">
+              <p id="reelCaption" class="result-caption"></p>
+              <button id="toggleCaptionBtn" class="btn-text-link hidden">Show more</button>
+            </div>
+
+            <div class="action-buttons">
+              <!-- Direct Download (Forced attachment) -->
+              <a id="downloadVideoBtn" href="#" class="btn-action btn-primary">
+                <span>🎬 Download Video (MP4)</span>
+              </a>
+
+              <!-- Download Thumbnail -->
+              <a id="downloadThumbBtn" href="#" class="btn-action btn-secondary">
+                <span>🖼️ Download Cover</span>
+              </a>
+
+              <!-- Copy Direct Link -->
+              <button id="copyLinkBtn" class="btn-action btn-secondary">
+                <span>📋 Copy Link</span>
+              </button>
+
+              <!-- Copy Caption -->
+              <button id="copyCaptionBtn" class="btn-action btn-secondary">
+                <span>📝 Copy Caption</span>
+              </button>
+            </div>
+
+            <!-- Download Another Button -->
+            <button id="resetBtn" class="btn-reset">
+              🔄 Download Another Reel
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Recent Downloads History Section -->
+    <section id="historySection" class="history-section hidden">
+      <div class="section-header-inline">
+        <h2>⏱️ Recent Downloads</h2>
+        <button id="clearHistoryBtn" class="btn-clear-history">Clear History</button>
+      </div>
+      <div id="historyGrid" class="history-grid">
+        <!-- History cards dynamically injected -->
+      </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="howItWorks" class="info-section">
+      <h2 class="section-title">How It Works</h2>
+      <p class="section-subtitle">Download your favorite reels in 3 quick and easy steps</p>
+
+      <div class="steps-grid">
+        <div class="step-card">
+          <div class="step-num">1</div>
+          <div class="step-icon">📲</div>
+          <h3>Copy the Link</h3>
+          <p>Open Instagram, find the Reel or Video you like, tap the share icon, and click <strong>Copy Link</strong>.</p>
+        </div>
+
+        <div class="step-card">
+          <div class="step-num">2</div>
+          <div class="step-icon">📋</div>
+          <h3>Paste in the Box</h3>
+          <p>Paste the link into the search box above or tap the <strong>Paste</strong> button for instant autofill.</p>
+        </div>
+
+        <div class="step-card">
+          <div class="step-num">3</div>
+          <div class="step-icon">⬇️</div>
+          <h3>Download & Enjoy</h3>
+          <p>Click <strong>Fetch Reel</strong> and hit the download button to save the MP4 video directly to your storage.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="info-section">
+      <h2 class="section-title">Why Choose InstaReels?</h2>
+      <p class="section-subtitle">Everything you need for seamless Instagram reel downloads</p>
+
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">✨</div>
+          <h3>Original High Quality</h3>
+          <p>Get videos in their native full HD quality with crisp audio without compression.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">⚡</div>
+          <h3>Lightning Fast Speeds</h3>
+          <p>High performance streaming backend ensures your download starts immediately without wait times.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">📱</div>
+          <h3>Universal Device Support</h3>
+          <p>Works smoothly on Android, iPhone, iPad, Windows, MacOS, and Linux browsers.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">🛡️</div>
+          <h3>Privacy First</h3>
+          <p>No login or personal credentials needed. We do not store or track your personal details.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section id="faq" class="info-section">
+      <h2 class="section-title">Frequently Asked Questions</h2>
+      <p class="section-subtitle">Got questions? We've got answers.</p>
+
+      <div class="faq-accordion">
+        <details class="faq-item">
+          <summary class="faq-question">
+            <span>Is this Instagram Reel Downloader free to use?</span>
+            <span class="faq-arrow">▾</span>
+          </summary>
+          <div class="faq-answer">
+            <p>Yes, our downloader is 100% free with unlimited downloads. You don't need any subscription or payment.</p>
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-question">
+            <span>Can I download private Instagram Reels?</span>
+            <span class="faq-arrow">▾</span>
+          </summary>
+          <div class="faq-answer">
+            <p>No. To respect user privacy and adhere to safety standards, only publicly accessible Instagram Reels and Posts can be downloaded.</p>
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-question">
+            <span>Where are the downloaded videos saved?</span>
+            <span class="faq-arrow">▾</span>
+          </summary>
+          <div class="faq-answer">
+            <p>Downloaded videos are typically saved in your device's default <strong>Downloads</strong> folder or your browser's designated download path.</p>
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-question">
+            <span>Do downloaded reels have any watermarks?</span>
+            <span class="faq-arrow">▾</span>
+          </summary>
+          <div class="faq-answer">
+            <p>No! All reels and videos downloaded through our service are completely free of added watermarks.</p>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="footer-content">
+        <div class="footer-brand">
+          <span class="brand-icon">⚡</span>
+          <span class="brand-text">Insta<span class="gradient-text">Reels</span></span>
+        </div>
+        <p class="footer-text">
+          Designed for personal use and backup. This tool is not affiliated with, endorsed, or sponsored by Instagram or Meta Platforms, Inc.
+        </p>
+        <div class="footer-bottom">
+          <p>© 2026 InstaReels Downloader. Built with Express.js & Modern Web Standards.</p>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

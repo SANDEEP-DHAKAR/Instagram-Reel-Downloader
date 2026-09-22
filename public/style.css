@@ -1205,3 +1205,423 @@ body {
 .hidden {
   display: none !important;
 }
+
+/* ==========================================================
+   Comprehensive Mobile & Tablet Responsive Design
+   ========================================================== */
+
+/* Touch optimization for mobile browsers */
+button, a, input {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Tablet & Smaller Laptops (<= 868px) */
+@media (max-width: 868px) {
+  .result-grid {
+    grid-template-columns: 1fr;
+    gap: 22px;
+  }
+
+  .media-col {
+    max-width: 340px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .main-wrapper {
+    padding: 30px 18px 70px;
+  }
+}
+
+/* Mobile Devices (<= 640px) */
+@media (max-width: 640px) {
+  /* Navbar */
+  .navbar {
+    padding: 10px 14px;
+  }
+
+  .brand-group {
+    gap: 8px;
+  }
+
+  .brand-text {
+    font-size: 1.15rem;
+  }
+
+  .creator-badge-nav {
+    padding: 3px 8px;
+    font-size: 0.72rem;
+    gap: 5px;
+  }
+
+  .creator-badge-nav .pulse-dot {
+    width: 5px;
+    height: 5px;
+  }
+
+  .nav-links a {
+    display: none; /* Hide text navigation links to avoid crowding on mobile */
+  }
+
+  .btn-icon {
+    width: 34px;
+    height: 34px;
+    font-size: 0.95rem;
+  }
+
+  /* Main Wrapper */
+  .main-wrapper {
+    padding: 18px 12px 60px;
+  }
+
+  /* Hero Section */
+  .hero {
+    margin-bottom: 26px;
+  }
+
+  .creator-hero-banner {
+    padding: 4px 12px 4px 6px;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+
+  .creator-avatar {
+    width: 30px;
+    height: 30px;
+    font-size: 1rem;
+  }
+
+  .creator-label {
+    font-size: 0.62rem;
+  }
+
+  .creator-name {
+    font-size: 0.88rem;
+  }
+
+  .creator-tag {
+    display: none; /* Hide extra tag on mobile to keep banner compact on single row */
+  }
+
+  .hero-title {
+    font-size: 1.85rem;
+    letter-spacing: -0.5px;
+    margin-bottom: 10px;
+    line-height: 1.25;
+  }
+
+  .hero-subtitle {
+    font-size: 0.88rem;
+    margin-bottom: 16px;
+    padding: 0 4px;
+  }
+
+  .feature-pills {
+    gap: 6px;
+  }
+
+  .pill {
+    font-size: 0.74rem;
+    padding: 4px 10px;
+  }
+
+  /* Downloader Card & Form */
+  .downloader-card {
+    padding: 16px 12px;
+    border-radius: 18px;
+    margin-bottom: 36px;
+  }
+
+  .downloader-form {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .input-wrapper input {
+    padding: 13px 94px 13px 40px;
+    font-size: 0.92rem;
+    border-radius: 12px;
+  }
+
+  .input-icon {
+    left: 12px;
+    font-size: 1.05rem;
+  }
+
+  .btn-action-inline {
+    padding: 6px 10px;
+    font-size: 0.78rem;
+    right: 8px;
+  }
+
+  #clearBtn {
+    right: 76px;
+    padding: 4px 8px;
+    font-size: 0.78rem;
+  }
+
+  .btn-submit {
+    width: 100%;
+    padding: 14px 20px;
+    font-size: 1rem;
+    border-radius: 12px;
+    justify-content: center;
+  }
+
+  /* Result Section */
+  .result-section {
+    margin-top: 20px;
+    padding-top: 20px;
+  }
+
+  .media-col {
+    max-width: 280px;
+    margin: 0 auto;
+    width: 100%;
+    gap: 12px;
+  }
+
+  .media-frame {
+    max-height: 380px;
+    border-radius: 12px;
+  }
+
+  .media-box-card {
+    border-radius: 14px;
+  }
+
+  .media-box-header {
+    padding: 8px 12px;
+  }
+
+  .media-box-title {
+    font-size: 0.78rem;
+  }
+
+  .result-title {
+    font-size: 1.15rem;
+  }
+
+  .caption-container {
+    padding: 10px 12px;
+  }
+
+  .result-caption {
+    font-size: 0.84rem;
+  }
+
+  /* Quality Selector */
+  .quality-selector-box {
+    padding: 12px;
+    border-radius: 14px;
+  }
+
+  .selector-title {
+    font-size: 0.82rem;
+  }
+
+  .format-chips {
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+
+  .format-chip {
+    font-size: 0.76rem;
+    padding: 7px 6px;
+    border-radius: 8px;
+  }
+
+  .quality-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+
+  .quality-card {
+    padding: 7px 4px;
+    border-radius: 10px;
+  }
+
+  .quality-label {
+    font-size: 0.76rem;
+  }
+
+  .quality-desc {
+    font-size: 0.65rem;
+  }
+
+  .quality-tag {
+    font-size: 0.6rem;
+    padding: 1px 4px;
+  }
+
+  .btn-download-hero {
+    padding: 13px 16px;
+    font-size: 0.95rem;
+    border-radius: 12px;
+  }
+
+  .action-buttons-secondary {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .btn-secondary {
+    padding: 10px 14px;
+    font-size: 0.85rem;
+  }
+
+  .btn-reset {
+    font-size: 0.82rem;
+    padding: 9px;
+  }
+
+  /* History Grid */
+  .history-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .history-thumb {
+    height: 95px;
+  }
+
+  .history-info {
+    padding: 8px;
+    gap: 4px;
+  }
+
+  .history-title {
+    font-size: 0.78rem;
+  }
+
+  .history-date {
+    font-size: 0.68rem;
+  }
+
+  .history-btn {
+    font-size: 0.72rem;
+    padding: 5px 8px;
+  }
+
+  /* Steps & Features */
+  .info-section {
+    margin-bottom: 44px;
+  }
+
+  .section-title {
+    font-size: 1.5rem;
+  }
+
+  .section-subtitle {
+    font-size: 0.85rem;
+    margin-bottom: 22px;
+  }
+
+  .steps-grid,
+  .features-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .step-card,
+  .feature-card {
+    padding: 16px;
+    border-radius: 16px;
+  }
+
+  .step-icon,
+  .feature-icon {
+    font-size: 1.8rem;
+    margin-bottom: 8px;
+  }
+
+  .step-card h3,
+  .feature-card h3 {
+    font-size: 1.05rem;
+  }
+
+  .step-card p,
+  .feature-card p {
+    font-size: 0.84rem;
+  }
+
+  /* FAQ */
+  .faq-question {
+    padding: 14px 16px;
+    font-size: 0.9rem;
+  }
+
+  .faq-answer {
+    padding: 0 16px 14px;
+    font-size: 0.84rem;
+  }
+
+  /* Footer */
+  .footer-creator-highlight {
+    font-size: 0.84rem;
+  }
+
+  .footer-text {
+    font-size: 0.78rem;
+  }
+
+  /* Toasts */
+  .toast-container {
+    top: 12px;
+    right: 12px;
+    left: 12px;
+  }
+
+  .toast {
+    width: 100%;
+    max-width: 100%;
+    font-size: 0.82rem;
+    padding: 10px 14px;
+  }
+}
+
+/* Extra Small Phones (<= 380px) */
+@media (max-width: 380px) {
+  .brand-text {
+    font-size: 1rem;
+  }
+
+  .creator-badge-nav {
+    display: none; /* Hide navbar creator badge on tiny 320px screens to avoid logo overflow */
+  }
+
+  .hero-title {
+    font-size: 1.6rem;
+  }
+
+  .media-col {
+    max-width: 240px;
+  }
+
+  .media-frame {
+    max-height: 330px;
+  }
+
+  .format-chips {
+    flex-direction: column;
+  }
+
+  .quality-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .input-wrapper input {
+    padding: 12px 84px 12px 38px;
+    font-size: 0.88rem;
+  }
+
+  .btn-action-inline {
+    padding: 5px 8px;
+    font-size: 0.72rem;
+  }
+
+  #clearBtn {
+    right: 68px;
+  }
+}

@@ -104,24 +104,25 @@
         <div class="result-grid">
           <!-- Media Preview Column -->
           <div class="media-col">
-            <!-- Dedicated Cover Thumbnail Showcase (Always visible!) -->
-            <div class="media-box-card" id="thumbCard">
-              <div class="media-box-header">
-                <span class="media-box-title">🖼️ Reel Cover Thumbnail</span>
-                <span class="badge-tag">HD Photo</span>
-              </div>
+            <!-- Mode Switcher: Cover Thumbnail vs Video Player -->
+            <div class="media-mode-toggle" id="mediaModeToggle">
+              <button type="button" class="mode-btn active" id="btnModeThumb">
+                🖼️ Cover Thumbnail
+              </button>
+              <button type="button" class="mode-btn" id="btnModeVideo">
+                🎬 Video Player
+              </button>
+            </div>
+
+            <!-- Single Responsive Media Frame -->
+            <div class="media-box-card">
+              <!-- Thumbnail View -->
               <div class="media-frame" id="thumbFrame">
                 <img id="reelCoverImg" src="" alt="Instagram Reel Cover" referrerpolicy="no-referrer" />
               </div>
-            </div>
 
-            <!-- Dedicated Video Player Showcase -->
-            <div class="media-box-card" id="videoCard">
-              <div class="media-box-header">
-                <span class="media-box-title">🎬 Video Player</span>
-                <span class="badge-tag live-badge">Live HD</span>
-              </div>
-              <div class="media-frame" id="videoFrame">
+              <!-- Video View -->
+              <div class="media-frame hidden" id="videoFrame">
                 <video id="reelVideoPlayer" controls playsinline></video>
               </div>
             </div>
@@ -150,13 +151,13 @@
               <!-- Format Switcher -->
               <div class="format-chips">
                 <button type="button" class="format-chip active" id="chipVideo" data-format="video">
-                  🎬 Video (MP4)
+                  🎬 <span class="chip-text">Video</span> <span class="chip-ext">(MP4)</span>
                 </button>
                 <button type="button" class="format-chip" id="chipAudio" data-format="audio">
-                  🎵 Audio (MP3)
+                  🎵 <span class="chip-text">Audio</span> <span class="chip-ext">(MP3)</span>
                 </button>
                 <button type="button" class="format-chip" id="chipCover" data-format="image">
-                  🖼️ Cover (HD)
+                  🖼️ <span class="chip-text">Cover</span> <span class="chip-ext">(HD)</span>
                 </button>
               </div>
 

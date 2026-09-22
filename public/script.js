@@ -16,10 +16,13 @@ document.addEventListener('DOMContentLoaded', () => {
   const statusMessage = document.getElementById('statusMessage');
   const resultCard = document.getElementById('resultCard');
 
-  // Media Showcase Elements
-  const thumbCard = document.getElementById('thumbCard');
+  // Media Showcase & Mode Switcher Elements
+  const mediaModeToggle = document.getElementById('mediaModeToggle');
+  const btnModeThumb = document.getElementById('btnModeThumb');
+  const btnModeVideo = document.getElementById('btnModeVideo');
+  const thumbFrame = document.getElementById('thumbFrame');
+  const videoFrame = document.getElementById('videoFrame');
   const reelCoverImg = document.getElementById('reelCoverImg');
-  const videoCard = document.getElementById('videoCard');
   const reelVideoPlayer = document.getElementById('reelVideoPlayer');
 
   const reelTitle = document.getElementById('reelTitle');
@@ -190,7 +193,32 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // --------------------------------------------------------
-  // 6. Interactive Format & Quality Selector Logic
+  // 6. Media Switcher Logic (Thumbnail vs Live Video)
+  // --------------------------------------------------------
+  function switchMediaMode(mode) {
+    if (mode === 'video' && currentReelData?.videoUrl) {
+      btnModeVideo.classList.add('active');
+      btnModeThumb.classList.remove('active');
+      videoFrame.classList.remove('hidden');
+      thumbFrame.classList.add('hidden');
+    } else {
+      btnModeThumb.classList.add('active');
+      btnModeVideo.classList.remove('active');
+      thumbFrame.classList.remove('hidden');
+      videoFrame.classList.add('hidden');
+      if (reelVideoPlayer) {
+        reelVideoPlayer.pause();
+      }
+    }
+  }
+
+  if (btnModeThumb && btnModeVideo) {
+    btnModeThumb.addEventListener('click', () => switchMediaMode('thumb'));
+    btnModeVideo.addEventListener('click', () => switchMediaMode('video'));
+  }
+
+  // --------------------------------------------------------
+  // 7. Interactive Format & Quality Selector Logic
   // --------------------------------------------------------
   chipVideo.addEventListener('click', () => {
     setActiveFormat('video');
@@ -212,14 +240,17 @@ document.addEventListener('DOMContentLoaded', () => {
       chipVideo.classList.add('active');
       videoQualityGroup.classList.remove('hidden');
       audioQualityGroup.classList.add('hidden');
+      switchMediaMode('video');
     } else if (format === 'audio') {
       chipAudio.classList.add('active');
       videoQualityGroup.classList.add('hidden');
       audioQualityGroup.classList.remove('hidden');
+      switchMediaMode('thumb');
     } else if (format === 'image') {
       chipCover.classList.add('active');
       videoQualityGroup.classList.add('hidden');
       audioQualityGroup.classList.add('hidden');
+      switchMediaMode('thumb');
     }
 
     updateDownloadButton();
@@ -252,36 +283,45 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!vidUrl) {
         mainDownloadText.textContent = '❌ Video Stream Not Available';
         mainDownloadBtn.removeAttribute('href');
+        mainDownloadBtn.removeAttribute('download');
         return;
       }
-      mainDownloadText.textContent = `⬇️ Download ${selectedVideoQuality.toUpperCase()} Video (MP4)`;
-      mainDownloadBtn.href = `/api/reels/stream?url=${encodeURIComponent(vidUrl)}&filename=instagram_reel_${shortcode}_${selectedVideoQuality}.mp4`;
+      const filename = `instagram_reel_${shortcode}_${selectedVideoQuality}.mp4`;
+      mainDownloadText.textContent = `⬇️ Download ${selectedVideoQuality.toUpperCase()} Video`;
+      mainDownloadBtn.href = `/api/reels/stream?url=${encodeURIComponent(vidUrl)}&filename=${filename}`;
+      mainDownloadBtn.setAttribute('download', filename);
       qualityBadge.textContent = selectedVideoQuality.toUpperCase();
     } else if (selectedFormat === 'audio') {
       const audUrl = currentReelData.audioUrl || currentReelData.videoUrl;
       if (!audUrl) {
         mainDownloadText.textContent = '❌ Audio Track Not Available';
         mainDownloadBtn.removeAttribute('href');
+        mainDownloadBtn.removeAttribute('download');
         return;
       }
+      const filename = `instagram_audio_${shortcode}_${selectedAudioQuality}kbps.mp3`;
       mainDownloadText.textContent = `🎵 Download ${selectedAudioQuality} kbps Audio (MP3)`;
-      mainDownloadBtn.href = `/api/reels/stream?url=${encodeURIComponent(audUrl)}&filename=instagram_audio_${shortcode}_${selectedAudioQuality}kbps.mp3&type=audio`;
+      mainDownloadBtn.href = `/api/reels/stream?url=${encodeURIComponent(audUrl)}&filename=${filename}&type=audio`;
+      mainDownloadBtn.setAttribute('download', filename);
       qualityBadge.textContent = `MP3 ${selectedAudioQuality}k`;
     } else if (selectedFormat === 'image') {
       const thumbUrl = currentReelData.thumbnail;
       if (!thumbUrl) {
         mainDownloadText.textContent = '❌ Cover Image Not Available';
         mainDownloadBtn.removeAttribute('href');
+        mainDownloadBtn.removeAttribute('download');
         return;
       }
+      const filename = `cover_${shortcode}.jpg`;
       mainDownloadText.textContent = `🖼️ Download HD Cover Image (JPG)`;
-      mainDownloadBtn.href = `/api/reels/stream?url=${encodeURIComponent(thumbUrl)}&filename=cover_${shortcode}.jpg&type=image`;
+      mainDownloadBtn.href = `/api/reels/stream?url=${encodeURIComponent(thumbUrl)}&filename=${filename}&type=image`;
+      mainDownloadBtn.setAttribute('download', filename);
       qualityBadge.textContent = 'HD Cover';
     }
   }
 
   // --------------------------------------------------------
-  // 7. Render Result Card (Guaranteed Thumbnail & Video)
+  // 8. Render Result Card (Guaranteed Thumbnail & Video)
   // --------------------------------------------------------
   function renderResult(data) {
     const shortcode = data.id || 'Reel';
@@ -302,7 +342,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // 1. Guaranteed Thumbnail Display
     const thumbUrl = data.thumbnail;
     if (thumbUrl) {
-      thumbCard.classList.remove('hidden');
       const fallbackProxy = `/api/reels/stream?url=${encodeURIComponent(thumbUrl)}&type=image&inline=true`;
       reelCoverImg.src = thumbUrl;
       reelCoverImg.dataset.tried = '';
@@ -312,19 +351,24 @@ document.addEventListener('DOMContentLoaded', () => {
           this.src = fallbackProxy;
         }
       };
-    } else {
-      thumbCard.classList.add('hidden');
     }
 
     // 2. Video Player Display
     if (data.videoUrl) {
-      videoCard.classList.remove('hidden');
       reelVideoPlayer.src = data.videoUrl;
       if (thumbUrl) {
         reelVideoPlayer.poster = thumbUrl;
       }
+      btnModeVideo.style.display = 'flex';
     } else {
-      videoCard.classList.add('hidden');
+      btnModeVideo.style.display = 'none';
+    }
+
+    // Show mode switcher only if video exists
+    if (data.videoUrl && thumbUrl) {
+      mediaModeToggle.classList.remove('hidden');
+    } else {
+      mediaModeToggle.classList.add('hidden');
     }
 
     // Default format to video if available, else image

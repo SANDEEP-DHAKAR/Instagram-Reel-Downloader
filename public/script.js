@@ -279,7 +279,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const shortcode = currentReelData.id || 'reel';
 
     if (selectedFormat === 'video') {
-      const vidUrl = currentReelData.videoUrl;
+      // Find matching video format or fallback to primary videoUrl
+      const matchedVideo = (currentReelData.allVideos || []).find(v => 
+        v.quality && v.quality.toLowerCase().includes(selectedVideoQuality.toLowerCase())
+      ) || (currentReelData.allVideos && currentReelData.allVideos[0]);
+
+      const vidUrl = matchedVideo?.url || currentReelData.videoUrl;
       if (!vidUrl) {
         mainDownloadText.textContent = '❌ Video Stream Not Available';
         mainDownloadBtn.removeAttribute('href');
@@ -292,7 +297,11 @@ document.addEventListener('DOMContentLoaded', () => {
       mainDownloadBtn.setAttribute('download', filename);
       qualityBadge.textContent = selectedVideoQuality.toUpperCase();
     } else if (selectedFormat === 'audio') {
-      const audUrl = currentReelData.audioUrl || currentReelData.videoUrl;
+      const matchedAudio = (currentReelData.allAudios || []).find(a => 
+        a.quality && a.quality.includes(selectedAudioQuality)
+      ) || (currentReelData.allAudios && currentReelData.allAudios[0]);
+
+      const audUrl = matchedAudio?.url || currentReelData.audioUrl || currentReelData.videoUrl;
       if (!audUrl) {
         mainDownloadText.textContent = '❌ Audio Track Not Available';
         mainDownloadBtn.removeAttribute('href');

@@ -50,28 +50,51 @@ const streamFile = async (req, res, next) => {
   if (type === 'image') contentType = 'image/jpeg';
   else if (type === 'audio') contentType = 'audio/mpeg';
 
+  const headers = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+    'Accept': '*/*'
+  };
+
+  // Only pass Instagram referer for Instagram/Facebook CDNs
+  if (url.includes('cdninstagram.com') || url.includes('instagram.com') || url.includes('fbcdn.net')) {
+    headers['Referer'] = 'https://www.instagram.com/';
+  }
+
   try {
     const response = await axios({
       method: 'GET',
       url,
       responseType: 'stream',
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
-        'Accept': '*/*',
-        'Referer': 'https://www.instagram.com/'
-      },
+      headers,
       timeout: 25000,
       maxRedirects: 5
     });
+
+    // Forward upstream Content-Length, Content-Type, and Accept-Ranges so media players can seek & stream
+    if (response.headers['content-length']) {
+      res.setHeader('Content-Length', response.headers['content-length']);
+    }
+    if (response.headers['accept-ranges']) {
+      res.setHeader('Accept-Ranges', response.headers['accept-ranges']);
+    }
+
+    const actualContentType = response.headers['content-type'] || contentType;
+    res.setHeader('Content-Type', actualContentType);
 
     if (isInline) {
       res.setHeader('Content-Disposition', `inline; filename="${safeFilename}"`);
     } else {
       res.setHeader('Content-Disposition', `attachment; filename="${safeFilename}"`);
     }
-    res.setHeader('Content-Type', contentType);
 
     response.data.pipe(res);
+
+    response.data.on('error', (err) => {
+      console.error('Upstream stream error:', err.message);
+      if (!res.headersSent) {
+        res.redirect(302, url);
+      }
+    });
   } catch (error) {
     console.error('Stream proxy error:', error.message);
     // Seamless fallback: If stream proxy encounters an issue, redirect browser to direct media URL

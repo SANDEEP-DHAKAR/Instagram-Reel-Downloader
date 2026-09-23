@@ -169,35 +169,68 @@ async function extractMediaInfo(url) {
       try {
         const data = JSON.parse(stdout.trim());
         
-        // Find highest quality video and audio URLs
-        const videoUrl = data.url || data.formats?.filter(f => f.vcodec !== 'none')?.pop()?.url || null;
-        const audioUrl = data.formats?.filter(f => f.acodec !== 'none' && f.vcodec === 'none')?.pop()?.url || null;
+        // Filter out m3u8 playlists, manifests, and non-playable URLs
+        const validFormats = (data.formats || []).filter(f => 
+          f && f.url && 
+          !f.url.includes('.m3u8') && 
+          !f.url.includes('manifest') && 
+          f.protocol !== 'm3u8_native' && 
+          f.protocol !== 'm3u8'
+        );
+
+        // 1. Prioritize Progressive formats (has both video AND audio tracks)
+        const progressiveFormats = validFormats.filter(f => 
+          f.vcodec && f.vcodec !== 'none' && 
+          f.acodec && f.acodec !== 'none'
+        );
+
+        // 2. Sort progressive formats by resolution descending
+        progressiveFormats.sort((a, b) => (b.height || 0) - (a.height || 0));
+
+        // 3. Fallback to H.264 / MP4 video formats if no progressive format exists
+        const videoFormats = validFormats.filter(f => f.vcodec && f.vcodec !== 'none');
+        videoFormats.sort((a, b) => {
+          const aIsH264 = (a.vcodec || '').includes('avc') || a.ext === 'mp4';
+          const bIsH264 = (b.vcodec || '').includes('avc') || b.ext === 'mp4';
+          if (aIsH264 && !bIsH264) return -1;
+          if (!aIsH264 && bIsH264) return 1;
+          return (b.height || 0) - (a.height || 0);
+        });
+
+        // Best playable video stream
+        const bestVideoFormat = progressiveFormats[0] || videoFormats[0];
+        const videoUrl = bestVideoFormat?.url || (data.url && !data.url.includes('.m3u8') ? data.url : null) || null;
+
+        // Audio stream
+        const audioFormats = validFormats.filter(f => f.acodec && f.acodec !== 'none');
+        audioFormats.sort((a, b) => (b.abr || 0) - (a.abr || 0));
+        const audioUrl = audioFormats[0]?.url || data.audio_url || videoUrl;
+
         const thumbnail = data.thumbnail || data.thumbnails?.pop()?.url || null;
         const caption = data.title || data.description || '';
 
-        // Formats list for quality selector
-        const allVideos = (data.formats || [])
-          .filter(f => f.url && f.vcodec !== 'none')
+        // Formats list for quality selector (prefer progressive, avoid raw unplayable AV1/m3u8)
+        const candidateVideos = progressiveFormats.length > 0 ? progressiveFormats : videoFormats;
+        const allVideos = candidateVideos
+          .filter(f => !f.vcodec?.includes('av01') || progressiveFormats.length === 0)
           .map(f => ({
             url: f.url,
             quality: f.format_note || (f.height ? `${f.height}p` : 'HD Video'),
-            ext: f.ext || 'mp4'
+            ext: 'mp4'
           }));
 
         if (allVideos.length === 0 && videoUrl) {
           allVideos.push({ url: videoUrl, quality: '1080p', ext: 'mp4' });
         }
 
-        const allAudios = (data.formats || [])
-          .filter(f => f.url && (f.acodec !== 'none' || f.vcodec === 'none'))
-          .map(f => ({
-            url: f.url,
-            quality: f.abr ? `${Math.round(f.abr)} kbps` : 'Audio (MP3/M4A)',
-            ext: f.ext || 'mp3'
-          }));
+        const allAudios = audioFormats.map(f => ({
+          url: f.url,
+          quality: f.abr ? `${Math.round(f.abr)} kbps` : 'Audio (MP3/M4A)',
+          ext: f.ext || 'mp3'
+        }));
 
         if (allAudios.length === 0 && audioUrl) {
-          allAudios.push({ url: audioUrl, quality: 'Audio MP3', ext: 'mp3' });
+          allAudios.push({ url: audioUrl, quality: 'MP3 Audio', ext: 'mp3' });
         }
 
         resolve({
